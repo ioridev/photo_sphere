@@ -52,8 +52,23 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
+  final List<Hotspot> _hotspots = [];
+
   @override
   Widget build(BuildContext context) {
+    for (int i = 0; i < 20; i++) {
+      _hotspots.add(
+        Hotspot(
+            latitude: 0,
+            longitude: i * 17 - 170,
+            width: 50,
+            height: 50,
+            widget: CircleAvatar(
+              backgroundColor: Colors.red,
+              child: Container(),
+            )),
+      );
+    }
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
@@ -64,6 +79,7 @@ class _MyHomePageState extends State<MyHomePage> {
           child: Panorama(
             sensorControl: SensorControl.Orientation,
             animSpeed: 0.1,
+            hotspots: _hotspots,
             child: Image.asset('assets/panorama.jpeg'),
           ),
         ),
