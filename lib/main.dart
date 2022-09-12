@@ -3,6 +3,7 @@ import 'dart:ffi';
 import 'package:flutter/material.dart';
 
 import 'package:ffi/ffi.dart';
+import 'package:panorama/panorama.dart';
 
 void main() {
   runApp(const MyApp());
@@ -57,20 +58,16 @@ class _MyHomePageState extends State<MyHomePage> {
       appBar: AppBar(
         title: Text(widget.title),
       ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
-            ),
-            Text(
-              _zlibVersion,
-              style: Theme.of(context).textTheme.headline4,
-            ),
-          ],
+      body: Scaffold(
+          body: Scaffold(
+        body: Center(
+          child: Panorama(
+            sensorControl: SensorControl.Orientation,
+            animSpeed: 0.1,
+            child: Image.asset('assets/panorama.jpeg'),
+          ),
         ),
-      ),
+      )),
       floatingActionButton: FloatingActionButton(
         onPressed: _incrementCounter,
         tooltip: 'Increment',
