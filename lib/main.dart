@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import 'package:ffi/ffi.dart';
 import 'package:panorama/panorama.dart';
+import 'package:camera/camera.dart';
 
 void main() {
   runApp(const MyApp());
@@ -44,6 +45,51 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  //カメラリスト
+  late List<CameraDescription> _cameras;
+
+  //カメラコントローラ
+  late CameraController _controller;
+
+  //
+  double _aspectRatio = 1.0;
+
+  @override
+  void initState() {
+    super.initState();
+
+    initCamera();
+  }
+
+  //
+  // カメラを準備
+  //
+  initCamera() async {
+    _cameras = await availableCameras();
+
+    if (_cameras.isNotEmpty) {
+      _controller = CameraController(_cameras[0], ResolutionPreset.high);
+      _controller.initialize().then((_) {
+        if (!mounted) {
+          return;
+        }
+
+        //カメラ接続時にbuildするようsetStateを呼び出し
+        setState(() {});
+      });
+    }
+  }
+
+  //
+  // カメラの表示比率を変更する
+  //
+  _toggle() {
+    setState(() {
+      _aspectRatio = _aspectRatio == 1.0 ? 0.7 : 1.0;
+    });
+  }
+
+  ///
   String _zlibVersion = 'Unknown';
 
   void _incrementCounter() {
@@ -74,21 +120,37 @@ class _MyHomePageState extends State<MyHomePage> {
         title: Text(widget.title),
       ),
       body: Scaffold(
-          body: Scaffold(
         body: Center(
-          child: Panorama(
-            sensorControl: SensorControl.Orientation,
-            animSpeed: 0.1,
-            hotspots: _hotspots,
-            child: Image.asset('assets/panorama.jpeg'),
+          child: Stack(
+            children: [
+              Panorama(
+                animSpeed: 0.1,
+                sensorControl: SensorControl.Orientation,
+                child: Image.asset(
+                  'assets/panorama.jpeg',
+                  fit: BoxFit.cover,
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(100),
+                child: CameraPreview(_controller),
+              ),
+              Panorama(
+                hotspots: _hotspots,
+                animSpeed: 0.1,
+                sensorControl: SensorControl.Orientation,
+              ),
+            ],
           ),
         ),
-      )),
+      ),
       floatingActionButton: FloatingActionButton(
         onPressed: _incrementCounter,
         tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+        child: const Icon(Icons.camera),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation
+          .centerDocked, // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 }
