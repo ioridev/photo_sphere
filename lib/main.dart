@@ -1,10 +1,12 @@
 import 'dart:ffi';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 
 import 'package:ffi/ffi.dart';
 import 'package:panorama/panorama.dart';
 import 'package:camera/camera.dart';
+import 'package:photo_manager/photo_manager.dart';
 
 void main() {
   runApp(const MyApp());
@@ -51,14 +53,30 @@ class _MyHomePageState extends State<MyHomePage> {
   //カメラコントローラ
   late CameraController _controller;
 
-  //
   double _aspectRatio = 1.0;
+
+  double _lon = 0;
+  double _lat = 0;
+  double _tilt = 0;
+
+  void onViewChanged(longitude, latitude, tilt) {
+    _lon = longitude;
+    _lat = latitude;
+    _tilt = tilt;
+  }
+
+  final List<Hotspot> picList = [];
+  final List<XFile> picFiles = [];
 
   @override
   void initState() {
     super.initState();
-
+    initPhotoLibrary();
     initCamera();
+  }
+
+  void initPhotoLibrary() async {
+    final PermissionState ps = await PhotoManager.requestPermissionExtend();
   }
 
   //
@@ -68,7 +86,7 @@ class _MyHomePageState extends State<MyHomePage> {
     _cameras = await availableCameras();
 
     if (_cameras.isNotEmpty) {
-      _controller = CameraController(_cameras[0], ResolutionPreset.high);
+      _controller = CameraController(_cameras[0], ResolutionPreset.veryHigh);
       _controller.initialize().then((_) {
         if (!mounted) {
           return;
@@ -90,11 +108,24 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   ///
-  String _zlibVersion = 'Unknown';
+  final String _zlibVersion = 'Unknown';
 
-  void _incrementCounter() {
+  void _shutter() {
     setState(() {
-      _zlibVersion = zlibVersion();
+      debugPrint("$_lon $_lat $_tilt");
+      // 静止画を撮影
+      _controller.takePicture().then((value) {
+        picFiles.add(value);
+        picList.add(Hotspot(
+            longitude: _lon,
+            latitude: _lat,
+            width: 400,
+            height: 400,
+            widget: Image.file(
+              //   width: MediaQuery.of(context).size.width - 80,
+              File(value.path),
+            )));
+      });
     });
   }
 
@@ -102,7 +133,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    for (int i = 0; i < 20; i++) {
+    for (int i = 0; i < 21; i++) {
       _hotspots.add(
         Hotspot(
             latitude: 0,
@@ -115,38 +146,89 @@ class _MyHomePageState extends State<MyHomePage> {
             )),
       );
     }
+    for (int i = 0; i < 21; i++) {
+      _hotspots.add(
+        Hotspot(
+            latitude: -20,
+            longitude: i * 17 - 170,
+            width: 50,
+            height: 50,
+            widget: CircleAvatar(
+              backgroundColor: Colors.red,
+              child: Container(),
+            )),
+      );
+    }
+    for (int i = 0; i < 11; i++) {
+      _hotspots.add(
+        Hotspot(
+            latitude: -40,
+            longitude: i * 34 - 170,
+            width: 50,
+            height: 50,
+            widget: CircleAvatar(
+              backgroundColor: Colors.red,
+              child: Container(),
+            )),
+      );
+    }
+    for (int i = 0; i < 11; i++) {
+      _hotspots.add(
+        Hotspot(
+            latitude: -60,
+            longitude: i * 34 - 170,
+            width: 50,
+            height: 50,
+            widget: CircleAvatar(
+              backgroundColor: Colors.red,
+              child: Container(),
+            )),
+      );
+    }
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.title),
-      ),
-      body: Scaffold(
-        body: Center(
-          child: Stack(
-            children: [
-              Panorama(
-                animSpeed: 0.1,
-                sensorControl: SensorControl.Orientation,
-                child: Image.asset(
-                  'assets/panorama.jpeg',
-                  fit: BoxFit.cover,
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(100),
+      body: Center(
+        child: Stack(
+          children: [
+            Panorama(
+              animSpeed: 0.1,
+              //   onViewChanged: onViewChanged,
+              hotspots: picList,
+              sensorControl: SensorControl.Orientation,
+              //    child: Image.asset(
+              //     'assets/panorama.jpeg',
+              //    fit: BoxFit.cover,
+              // ),
+            ),
+            Center(
+              child: Padding(
+                padding: const EdgeInsets.all(60),
                 child: CameraPreview(_controller),
               ),
-              Panorama(
-                hotspots: _hotspots,
-                animSpeed: 0.1,
-                sensorControl: SensorControl.Orientation,
+            ),
+            Panorama(
+              hotspots: _hotspots,
+              onViewChanged: onViewChanged,
+              animSpeed: 0.1,
+              sensorControl: SensorControl.Orientation,
+            ),
+            SafeArea(
+              child: IconButton(
+                onPressed: () {
+                  // picList2の写真をiPhoneの写真に保存する
+                  for (var element in picFiles) {
+                    PhotoManager.editor
+                        .saveImageWithPath(element.path, title: "");
+                  }
+                },
+                icon: const Icon(Icons.check),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
+
       floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
+        onPressed: _shutter,
         child: const Icon(Icons.camera),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation

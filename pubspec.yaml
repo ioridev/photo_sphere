@@ -17,6 +17,7 @@ dependencies:
   sensors_plus: ^1.3.4+1
   panorama: ^0.4.1
   camera: ^0.10.0+1
+  photo_manager: ^2.3.0
 
 dev_dependencies:
   flutter_test:
