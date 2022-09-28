@@ -30,7 +30,8 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
-        primarySwatch: Colors.blue,
+        brightness: Brightness.dark,
+        primarySwatch: Colors.red,
       ),
       home: const MyHomePage(title: 'Flutter Demo Home Page'),
     );
@@ -141,7 +142,7 @@ class _MyHomePageState extends State<MyHomePage> {
             width: 50,
             height: 50,
             widget: CircleAvatar(
-              backgroundColor: Colors.red,
+              backgroundColor: Colors.white,
               child: Container(),
             )),
       );
@@ -154,7 +155,7 @@ class _MyHomePageState extends State<MyHomePage> {
             width: 50,
             height: 50,
             widget: CircleAvatar(
-              backgroundColor: Colors.red,
+              backgroundColor: Colors.white,
               child: Container(),
             )),
       );
@@ -167,7 +168,7 @@ class _MyHomePageState extends State<MyHomePage> {
             width: 50,
             height: 50,
             widget: CircleAvatar(
-              backgroundColor: Colors.red,
+              backgroundColor: Colors.white,
               child: Container(),
             )),
       );
@@ -180,7 +181,7 @@ class _MyHomePageState extends State<MyHomePage> {
             width: 50,
             height: 50,
             widget: CircleAvatar(
-              backgroundColor: Colors.red,
+              backgroundColor: Colors.white,
               child: Container(),
             )),
       );
@@ -227,9 +228,28 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
       ),
 
-      floatingActionButton: FloatingActionButton(
-        onPressed: _shutter,
-        child: const Icon(Icons.camera),
+      floatingActionButton: Container(
+        // 枠線
+        decoration: const BoxDecoration(
+          border: Border(
+            top: BorderSide(width: 1.0, color: Colors.white),
+            left: BorderSide(width: 1.0, color: Colors.white),
+            right: BorderSide(width: 1.0, color: Colors.white),
+            bottom: BorderSide(width: 1.0, color: Colors.white),
+          ),
+          borderRadius: BorderRadius.all(Radius.circular(50)),
+        ),
+        width: 80,
+        height: 80,
+        child: Padding(
+          padding: const EdgeInsets.all(3),
+          child: FloatingActionButton(
+            onPressed: _shutter,
+            foregroundColor: Colors.black,
+            backgroundColor: Colors.white,
+            child: const Icon(Icons.camera_alt),
+          ),
+        ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation
           .centerDocked, // This trailing comma makes auto-formatting nicer for build methods.
