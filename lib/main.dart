@@ -1,24 +1,13 @@
-import 'dart:ffi';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
 
-import 'package:ffi/ffi.dart';
 import 'package:panorama/panorama.dart';
 import 'package:camera/camera.dart';
 import 'package:photo_manager/photo_manager.dart';
 
 void main() {
   runApp(const MyApp());
-}
-
-String zlibVersion() {
-  final z = DynamicLibrary.open('libz.so');
-  final zlibVersionPointer =
-      z.lookup<NativeFunction<Pointer<Utf8> Function()>>('zlibVersion');
-  final zlibVersion = zlibVersionPointer.asFunction<Pointer<Utf8> Function()>();
-  final result = zlibVersion().toDartString();
-  return result;
 }
 
 class MyApp extends StatelessWidget {
@@ -54,7 +43,7 @@ class _MyHomePageState extends State<MyHomePage> {
   //カメラコントローラ
   late CameraController _controller;
 
-  double _aspectRatio = 1.0;
+  final double _aspectRatio = 1.0;
 
   double _lon = 0;
   double _lat = 0;
@@ -97,15 +86,6 @@ class _MyHomePageState extends State<MyHomePage> {
         setState(() {});
       });
     }
-  }
-
-  //
-  // カメラの表示比率を変更する
-  //
-  _toggle() {
-    setState(() {
-      _aspectRatio = _aspectRatio == 1.0 ? 0.7 : 1.0;
-    });
   }
 
   ///
@@ -192,18 +172,28 @@ class _MyHomePageState extends State<MyHomePage> {
           children: [
             Panorama(
               animSpeed: 0.1,
-              //   onViewChanged: onViewChanged,
               hotspots: picList,
               sensorControl: SensorControl.Orientation,
-              //    child: Image.asset(
-              //     'assets/panorama.jpeg',
-              //    fit: BoxFit.cover,
-              // ),
             ),
             Center(
               child: Padding(
                 padding: const EdgeInsets.all(60),
                 child: CameraPreview(_controller),
+              ),
+            ),
+            Center(
+              child: Container(
+                decoration: const BoxDecoration(
+                  border: Border(
+                    top: BorderSide(width: 1.0, color: Colors.white),
+                    left: BorderSide(width: 1.0, color: Colors.white),
+                    right: BorderSide(width: 1.0, color: Colors.white),
+                    bottom: BorderSide(width: 1.0, color: Colors.white),
+                  ),
+                  borderRadius: BorderRadius.all(Radius.circular(50)),
+                ),
+                width: 60,
+                height: 60,
               ),
             ),
             Panorama(
