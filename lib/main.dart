@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import 'package:panorama/panorama.dart';
@@ -63,6 +64,19 @@ class _MyHomePageState extends State<MyHomePage> {
     super.initState();
     initPhotoLibrary();
     initCamera();
+    for (int i = 0; i < 21; i++) {
+      _hotspots.add(
+        Hotspot(
+            latitude: 0,
+            longitude: i * 17 - 170,
+            width: 50,
+            height: 50,
+            widget: CircleAvatar(
+              backgroundColor: Colors.white,
+              child: Container(),
+            )),
+      );
+    }
   }
 
   void initPhotoLibrary() async {
@@ -88,9 +102,6 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
-  ///
-  final String _zlibVersion = 'Unknown';
-
   void _shutter() {
     setState(() {
       debugPrint("$_lon $_lat $_tilt");
@@ -114,58 +125,6 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    for (int i = 0; i < 21; i++) {
-      _hotspots.add(
-        Hotspot(
-            latitude: 0,
-            longitude: i * 17 - 170,
-            width: 50,
-            height: 50,
-            widget: CircleAvatar(
-              backgroundColor: Colors.white,
-              child: Container(),
-            )),
-      );
-    }
-    for (int i = 0; i < 21; i++) {
-      _hotspots.add(
-        Hotspot(
-            latitude: -20,
-            longitude: i * 17 - 170,
-            width: 50,
-            height: 50,
-            widget: CircleAvatar(
-              backgroundColor: Colors.white,
-              child: Container(),
-            )),
-      );
-    }
-    for (int i = 0; i < 11; i++) {
-      _hotspots.add(
-        Hotspot(
-            latitude: -40,
-            longitude: i * 34 - 170,
-            width: 50,
-            height: 50,
-            widget: CircleAvatar(
-              backgroundColor: Colors.white,
-              child: Container(),
-            )),
-      );
-    }
-    for (int i = 0; i < 11; i++) {
-      _hotspots.add(
-        Hotspot(
-            latitude: -60,
-            longitude: i * 34 - 170,
-            width: 50,
-            height: 50,
-            widget: CircleAvatar(
-              backgroundColor: Colors.white,
-              child: Container(),
-            )),
-      );
-    }
     return Scaffold(
       body: Center(
         child: Stack(
@@ -203,43 +162,86 @@ class _MyHomePageState extends State<MyHomePage> {
               sensorControl: SensorControl.Orientation,
             ),
             SafeArea(
-              child: IconButton(
-                onPressed: () {
-                  // picList2の写真をiPhoneの写真に保存する
-                  for (var element in picFiles) {
-                    PhotoManager.editor
-                        .saveImageWithPath(element.path, title: "");
-                  }
-                },
-                icon: const Icon(Icons.check),
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Align(
+                  alignment: Alignment.topCenter,
+                  child: Container(
+                    color: Colors.black.withOpacity(0.5),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        Text("${picFiles.length}枚"),
+                        const Text('1080p'),
+                        InkWell(
+                            onTap: (() {
+                              setState(() {
+                                picFiles.clear();
+                                picList.clear();
+                              });
+                            }),
+                            child: const Text('リセット')),
+                      ],
+                    ),
+                  ),
+                ),
               ),
             ),
           ],
         ),
       ),
 
-      floatingActionButton: Container(
-        // 枠線
-        decoration: const BoxDecoration(
-          border: Border(
-            top: BorderSide(width: 1.0, color: Colors.white),
-            left: BorderSide(width: 1.0, color: Colors.white),
-            right: BorderSide(width: 1.0, color: Colors.white),
-            bottom: BorderSide(width: 1.0, color: Colors.white),
-          ),
-          borderRadius: BorderRadius.all(Radius.circular(50)),
-        ),
-        width: 80,
-        height: 80,
-        child: Padding(
-          padding: const EdgeInsets.all(3),
-          child: FloatingActionButton(
-            onPressed: _shutter,
+      floatingActionButton: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          FloatingActionButton(
+            onPressed: () async {
+              // picList2の写真をiPhoneの写真に保存する
+              for (var element in picFiles) {
+                PhotoManager.editor.saveImageWithPath(element.path, title: "");
+              }
+
+              // picList2の写真をzipにして共有する
+            },
             foregroundColor: Colors.black,
             backgroundColor: Colors.white,
-            child: const Icon(Icons.camera_alt),
+            child: const Icon(Icons.check),
           ),
-        ),
+          Container(
+            // 枠線
+            decoration: const BoxDecoration(
+              border: Border(
+                top: BorderSide(width: 1.0, color: Colors.white),
+                left: BorderSide(width: 1.0, color: Colors.white),
+                right: BorderSide(width: 1.0, color: Colors.white),
+                bottom: BorderSide(width: 1.0, color: Colors.white),
+              ),
+              borderRadius: BorderRadius.all(Radius.circular(50)),
+            ),
+            width: 80,
+            height: 80,
+            child: Padding(
+              padding: const EdgeInsets.all(3),
+              child: FloatingActionButton(
+                onPressed: _shutter,
+                foregroundColor: Colors.black,
+                backgroundColor: Colors.white,
+                child: const Icon(Icons.camera_alt),
+              ),
+            ),
+          ),
+          FloatingActionButton(
+            onPressed: () {
+              setState(() {
+                picList.removeLast();
+                picFiles.removeLast();
+              });
+            },
+            foregroundColor: Colors.black,
+            backgroundColor: Colors.white,
+            child: const Icon(CupertinoIcons.arrow_uturn_left),
+          ),
+        ],
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation
           .centerDocked, // This trailing comma makes auto-formatting nicer for build methods.
