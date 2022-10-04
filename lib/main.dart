@@ -2,9 +2,12 @@ import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_archive/flutter_archive.dart';
+import 'package:flutter_share/flutter_share.dart';
 
 import 'package:panorama/panorama.dart';
 import 'package:camera/camera.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:photo_manager/photo_manager.dart';
 
 void main() {
@@ -196,12 +199,54 @@ class _MyHomePageState extends State<MyHomePage> {
         children: [
           FloatingActionButton(
             onPressed: () async {
-              // picList2の写真をiPhoneの写真に保存する
-              for (var element in picFiles) {
-                PhotoManager.editor.saveImageWithPath(element.path, title: "");
-              }
+// ロード表示
+              showDialog(
+                context: context,
+                barrierDismissible: false,
+                builder: (BuildContext context) {
+                  return const Center(
+                    child: CircularProgressIndicator(),
+                  );
+                },
+              );
 
-              // picList2の写真をzipにして共有する
+              // picListの写真をiPhoneの写真に保存する
+              for (var element in picFiles) {
+                await PhotoManager.editor
+                    .saveImageWithPath(element.path, title: "");
+              }
+              // picList<Xfile>をList<File>に変換
+              List<File> files = [];
+              for (var element in picFiles) {
+                files.add(File(element.path));
+              }
+              Directory? appDocDirectory =
+                  await getApplicationDocumentsDirectory();
+
+              final sourceDir = Directory(picFiles.first.path);
+              debugPrint("${sourceDir.path}  ${sourceDir.parent.path}");
+              // Zip the FILES files into a folder.
+
+              String zipPath = appDocDirectory.path +
+                  '/' +
+                  DateTime.now().toString() +
+                  ".zip";
+
+              await ZipFile.createFromFiles(
+                files: files,
+                sourceDir: sourceDir.parent,
+                zipFile: File(zipPath),
+              );
+
+              // zipFileを共有する
+              await FlutterShare.shareFile(
+                title: 'test',
+                text: 'test',
+                filePath: zipPath,
+              );
+
+              //    ロード表示を消す
+              Navigator.pop(context);
             },
             foregroundColor: Colors.black,
             backgroundColor: Colors.white,
